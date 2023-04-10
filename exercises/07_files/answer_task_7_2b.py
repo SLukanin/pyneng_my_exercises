@@ -15,22 +15,15 @@
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 
 """
+from sys import argv
 
 ignore = ["duplex", "alias", "configuration"]
 
-from sys import argv
-from pprint import pprint
+src_file, dst_file = argv[1], argv[2]
 
-config_list = []
-with open(argv[1]) as f:
-    for line in f:
-        #line = line.rstrip()
-        not_in_ignore = True
-        for i in ignore:
-            if i in line:
-                not_in_ignore = False        
-        if ('!' not in line) and not_in_ignore: #not any(ign in line for ign in ignore):
-            config_list.append(line)
-
-with open(argv[2], 'w') as dest:
-    dest.writelines(config_list)
+with open(src_file) as src, open(dst_file, 'w') as dst:
+    for line in src:
+        words = line.split()
+        words_intersect = set(words) & set(ignore)
+        if not line.startswith("!") and not words_intersect:
+            dst.write(line)

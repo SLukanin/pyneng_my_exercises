@@ -40,13 +40,10 @@ interface Ethernet0/3
 
 """
 from sys import argv
-from pprint import pprint
-config_list = []
-with open(argv[1]) as f:
-    for line in f:
-        line = line.rstrip()
-        if '!' not in line:
-            config_list.append(line)
 
-for line in config_list:
-    print(line)
+filename = argv[1]
+
+with open(filename) as f:
+    for line in f:
+        if not line.startswith("!"):
+            print(line.rstrip())

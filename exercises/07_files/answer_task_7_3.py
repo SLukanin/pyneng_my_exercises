@@ -20,8 +20,10 @@
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 
 """
-with open(r'C:\Pyneng\pyneng_my_exercises\exercises\07_files\CAM_table.txt') as f:
-    for line in f:
-        line_list = line.split()
-        if line_list and line_list[0].isdigit():
-            print('{:9}{:20}{}'.format(line_list[0], line_list[1], line_list[3]))
+
+with open("CAM_table.txt") as conf:
+    for line in conf:
+        words = line.split()
+        if words and words[0].isdigit():
+            vlan, mac, _, interface = words
+            print(f"{vlan:9}{mac:20}{interface}")
