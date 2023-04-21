@@ -29,7 +29,6 @@ Cгенерировать топологию, которая соответст�
 
 """
 from task_11_1 import parse_cdp_neighbors
-import draw_network_graph
 from pprint import pprint
 
 infiles = [
@@ -39,18 +38,17 @@ infiles = [
     "sh_cdp_n_r3.txt",
 ]
 
+
 def create_network_map(filenames):
-    net_map = {}
-    for file in filenames:
-        with open(file) as f:
-            net_map.update(parse_cdp_neighbors(f.read()))
-    return net_map
+    network_map = {}
+
+    for filename in filenames:
+        with open(filename) as show_command:
+            parsed = parse_cdp_neighbors(show_command.read())
+            network_map.update(parsed)
+    return network_map
+
 
 if __name__ == "__main__":
-    network = create_network_map(infiles)
-
-    pprint(network)
-    # for k, val in network.items():
-    #     print(k, val)
-    
-    draw_network_graph.draw_topology(network)
+    topology = create_network_map(infiles)
+    pprint(topology)

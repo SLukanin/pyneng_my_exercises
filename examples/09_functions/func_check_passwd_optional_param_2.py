@@ -9,3 +9,11 @@ def check_passwd(username, password, min_length=8, check_username=True):
         print(f'Пароль для пользователя {username} прошел все проверки')
         return True
 
+username_passwd = [{'username': 'cisco', 'password': 'cisco'},
+
+{'username': 'nata', 'password': 'natapass'},
+
+{'username': 'user', 'password': '123456789'}]
+
+for data in username_passwd:
+    check_passwd(**data, check_username=False, min_length=4)

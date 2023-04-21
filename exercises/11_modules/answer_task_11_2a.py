@@ -74,11 +74,6 @@
 
 """
 
-from pprint import pprint
-from task_11_1 import parse_cdp_neighbors
-from task_11_2 import create_network_map
-from draw_network_graph import draw_topology
-
 infiles = [
     "sh_cdp_n_sw1.txt",
     "sh_cdp_n_r1.txt",
@@ -87,43 +82,19 @@ infiles = [
 ]
 
 
-
 def unique_network_map(topology_dict):
-    topology_set = set()
-    unique_dict = topology_dict.copy()
-    result = topology_dict.copy()
-    pprint(unique_dict)
-    counter = 0
+    network_map = {}
+    for key, value in topology_dict.items():
+        if not network_map.get(value) == key:
+            network_map[key] = value
+    return network_map
 
-    # for k, val in topology_dict.items():
-    #     topology_set.add((k, val))
 
-    # for k, val in topology_dict.items():
-    #     if counter == 0:
-    #         counter += 1
-    #         continue
-    #     else:
-    #         for k1, val1 in unique_dict.items():
-    #             if k1 == val and val1 == k:
-    #                 del unique_dict[k1]
-    #                 break
+# второй вариант решения
+def unique_network_map(topology_dict):
+    network_map = {}
+    for key, value in topology_dict.items():
+        key, value = sorted([key, value])
+        network_map[key] = value
+    return network_map
 
-    
-    # for k, val in topology_dict.items():
-    #     if topology_dict.get(val) != None:
-    #         continue
-    #     else:
-    #         result[k] = val
-    
-    for k, val in topology_dict.items(): 
-        if unique_dict.get(val) != None and unique_dict.get(unique_dict[val]) !=  None:
-            del unique_dict[val]
-
-    return unique_dict
-
-if __name__ == '__main__':
-    topology = create_network_map(infiles)
-    pprint(topology)
-    print('-' * 40)
-    un_top = unique_network_map(topology)
-    pprint(un_top)
