@@ -34,33 +34,20 @@
  '172.21.41.129', '172.21.41.130', '172.21.41.131', '172.21.41.132']
 
 """
-from pprint import pprint
-from task_12_1 import ping_ip_addresses
 import ipaddress
 
-def convert_ranges_to_ip_list(ip_list):
-    ips = []
-    for ip in ip_list:
-        if not '-' in ip:
-            ips.append(ip)
-        else:
-            st, end = ip.split('-')
-            st_oct = st.split('.')[-1]
-            end_oct = end.split('.')[-1]
-            oct1, oct2, oct3, oct4 = st.split('.')
-            i = int(st_oct)
-            while i <= int(end_oct):
-                ips.append(f'{oct1}.{oct2}.{oct3}.{str(i)}')
-                i += 1
-    return ips
 
-if __name__ == '__main__':
-    ip_listt = [
-        '8.8.8.8',
-        '172.16.0.1-3',
-        '192.168.88.1'
-    ]
-    ip_listt = convert_ranges_to_ip_list(ip_listt)
-    pprint(ip_listt)
-    
-    ip = ping_ip_addresses(ip_listt)
+def convert_ranges_to_ip_list(ip_addresses):
+    ip_list = []
+    for ip_address in ip_addresses:
+        if "-" in ip_address:
+            start_ip, stop_ip = ip_address.split("-")
+            if "." not in stop_ip:
+                stop_ip = ".".join(start_ip.split(".")[:-1] + [stop_ip])
+            start_ip = ipaddress.ip_address(start_ip)
+            stop_ip = ipaddress.ip_address(stop_ip)
+            for ip in range(int(start_ip), int(stop_ip) + 1):
+                ip_list.append(str(ipaddress.ip_address(ip)))
+        else:
+            ip_list.append(ip_address)
+    return ip_list
