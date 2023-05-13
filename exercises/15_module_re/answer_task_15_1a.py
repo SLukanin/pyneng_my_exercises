@@ -24,27 +24,16 @@
 а не ввод пользователя.
 
 """
-
 import re
-from pprint import pprint
 
-def get_ip_from_cfg(file):
-    regex = r'ip address *(?P<ip>\S+) *(?P<mask>\S+)|^interface *(?P<intf>\S+)'
-    result = {}
-    with open(file) as f:
-        for line in f:
-            match = re.search(regex, line)
-            if match:
-                if match.lastgroup == 'intf':
-                    interface = match.group('intf')
-                    result[interface] = []
-                else:
-                    result[interface] = match.group('ip', 'mask')
-    result ={key: value for key, value in result.items() if value}
+def get_ip_from_cfg(config):
+    with open(config) as f:
+        regex = re.compile(
+            r"interface (?P<intf>\S+)\n"
+            r"( .*\n)*"
+            r" ip address (?P<ip>\S+) (?P<mask>\S+)"
+        )
+        match = regex.finditer(f.read())
+
+    result = {m.group("intf"): m.group("ip", "mask") for m in match}
     return result
-
-
-
-if __name__ == '__main__':
-  res = get_ip_from_cfg('config_r1.txt')
-  pprint(res)
