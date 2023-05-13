@@ -24,16 +24,10 @@
 
 """
 import re
-from pprint import pprint
 
 
-def get_ip_from_cfg(file):
-    regex = r'ip address *(?P<ip>\S+) *(?P<mask>\S+)'
-    with open(file) as f:
-        result = [m.group(1, 2) for m in re.finditer(regex, f.read())]
+def get_ip_from_cfg(config):
+    regex = r"ip address (\S+) (\S+)"
+    with open(config) as f:
+        result = [m.groups() for m in re.finditer(regex, f.read())]
     return result
-
-
-if __name__ == '__main__':
-    res = get_ip_from_cfg('config_r1.txt')
-    pprint(res)
