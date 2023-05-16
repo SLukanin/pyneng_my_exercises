@@ -42,42 +42,36 @@
 
 Кроме того, создан список заголовков (headers), который должен быть записан в CSV.
 """
-
-import glob
 import re
 import csv
-from pprint import pprint
-
-sh_version_files = glob.glob("sh_vers*")
-# print(sh_version_files)
+import glob
 
 
-
-def parse_sh_version(sh_version_one_string):
-    regex = r'Version *(?P<ios>\S+),.+router uptime is (?P<up>\d+ \S+ \d+ \S+ \d+ \S+)?.+System image file is "(?P<img>\S+)?".+'
-    match = re.search(regex, sh_version_one_string, flags=re.DOTALL)
+def parse_sh_version(sh_ver_output):
+    regex = (
+        "Cisco IOS .*? Version (?P<ios>\S+), .*"
+        "uptime is (?P<uptime>[\w, ]+)\n.*"
+        'image file is "(?P<image>\S+)".*'
+    )
+    match = re.search(regex, sh_ver_output, re.DOTALL,)
     if match:
-        return match.group('ios', 'img','up')
-    else:
-        return None
+        return match.group("ios", "image", "uptime")
 
-def write_inventory_to_csv(files, csv_filename):
+
+def write_inventory_to_csv(data_filenames, csv_filename):
     headers = ["hostname", "ios", "image", "uptime"]
-    with open(csv_filename, 'w', newline='') as dest:
-        writer = csv.writer(dest)
+    with open(csv_filename, "w") as f:
+        writer = csv.writer(f)
         writer.writerow(headers)
 
-        for file in files:
-            hostname = re.search(r'sh_version_(\S+)\.txt', file).group(1)
-            with open(file) as f:
-                parsed = parse_sh_version(f.read())
-                row = [hostname] + list(parsed)
-                writer.writerow(row)
+        for filename in data_filenames:
+            hostname = re.search("sh_version_(\S+).txt", filename).group(1)
+            with open(filename) as f:
+                parsed_data = parse_sh_version(f.read())
+                if parsed_data:
+                    writer.writerow([hostname] + list(parsed_data))
 
 
-
-    return
-
-if __name__ == '__main__':
-    files = ['sh_version_r1.txt', 'sh_version_r2.txt', 'sh_version_r3.txt']
-    write_inventory_to_csv(files, 'pa.txt')
+if __name__ == "__main__":
+    sh_version_files = glob.glob("sh_vers*")
+    write_inventory_to_csv(sh_version_files, "routers_inventory.csv")

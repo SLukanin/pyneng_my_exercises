@@ -36,3 +36,4 @@ Thumbs.db
 
 # Virual environments
 venv/
+/.pytest_cache/

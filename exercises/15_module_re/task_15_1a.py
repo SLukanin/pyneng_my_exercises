@@ -28,6 +28,7 @@
 import re
 from pprint import pprint
 
+
 def get_ip_from_cfg(file):
     regex = r'ip address *(?P<ip>\S+) *(?P<mask>\S+)|^interface *(?P<intf>\S+)'
     result = {}
@@ -40,11 +41,10 @@ def get_ip_from_cfg(file):
                     result[interface] = []
                 else:
                     result[interface] = match.group('ip', 'mask')
-    result ={key: value for key, value in result.items() if value}
+    result = {key: value for key, value in result.items() if value}
     return result
 
 
-
 if __name__ == '__main__':
-  res = get_ip_from_cfg('config_r1.txt')
-  pprint(res)
+    res = get_ip_from_cfg('config_r1.txt')
+    pprint(res)

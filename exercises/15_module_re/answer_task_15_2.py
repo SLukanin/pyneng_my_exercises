@@ -22,19 +22,10 @@
 
 """
 import re
-from pprint import pprint
 
 
-def parse_sh_ip_int_br(file):
-    result = []
-    regex = r'(?P<intf>\S+) +(?P<ip>\S+) +\w+ +\w+ +(?P<status>up|down|administratively down) +(?P<protocol>up|down)'
-    with open(file) as f:
-        match_iter = re.finditer(regex, f.read())
-        result = [m.groups() for m in match_iter]
-    # for m in match_iter:
-    #     result.append(m.groups())
+def parse_sh_ip_int_br(textfile):
+    regex = r"(\S+) +(\S+) +\w+ \w+ +(administratively down|up|down) +(up|down)"
+    with open(textfile) as f:
+        result = [m.groups() for m in re.finditer(regex, f.read())]
     return result
-
-
-if __name__ == '__main__':
-    pprint(parse_sh_ip_int_br('sh_ip_int_br.txt'))
