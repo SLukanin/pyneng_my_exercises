@@ -56,6 +56,7 @@ def transform_topology(filename):
     for key, val in source_dict.items():
         for key1, val1 in val.items():
             result[(key, key1)] = [(k, v) for k, v in val1.items()][0]
+    unique_dict = {}
 
     pprint(result)
     return

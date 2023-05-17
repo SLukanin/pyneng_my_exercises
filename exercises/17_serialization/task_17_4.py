@@ -62,7 +62,7 @@ def convert_datetime_to_str(datetime_obj):
 
 def write_last_log_to_csv(source_log, output):
     result = []
-    with open(source_log) as scr, open(output, 'w') as dest:
+    with open(source_log) as scr, open(output, 'w', newline='') as dest:
         reader = csv.reader(scr)
         headers = reader.__next__()
         log_list = sorted(list(reader), key= lambda x: x[1])
@@ -78,11 +78,11 @@ def write_last_log_to_csv(source_log, output):
             pprint(dates)
             result.append([dates[-1][1], mail, convert_datetime_to_str(dates[-1][0])])
 
-    pprint(result)
-    print(result[0][2])
+            writer = csv.writer(dest)
+            writer.writerows(result)
 
     return
 
 
 if __name__ == '__main__':
-    write_last_log_to_csv('mail_log.csv', '111.csv')
+    write_last_log_to_csv('mail_log.csv', '1112.csv')
