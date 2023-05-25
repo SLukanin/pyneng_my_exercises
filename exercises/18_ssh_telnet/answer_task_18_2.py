@@ -27,9 +27,15 @@ Out[8]: ['logging 10.255.255.1', 'logging buffered 20010', 'no logging console']
 In [9]: result = send_config_commands(r1, commands)
 
 In [10]: result
-Out[10]: 'config term\nEnter configuration commands, one per line.  End with CNTL/Z.
-         \nR1(config)#logging 10.255.255.1\nR1(config)#logging buffered 20010\n
-         R1(config)#no logging console\nR1(config)#end\nR1#'
+Out[10]: 'config term
+Enter configuration commands, one per line.  End with CNTL/Z.
+         
+R1(config)#logging 10.255.255.1
+R1(config)#logging buffered 20010
+
+         R1(config)#no logging console
+R1(config)#end
+R1#'
 
 In [11]: print(result)
 config term
@@ -44,34 +50,23 @@ R1#
 Скрипт должен отправлять команду command на все устройства из файла devices.yaml
 с помощью функции send_config_commands.
 """
-
-from netmiko import (ConnectHandler,
-                     NetMikoAuthenticationException,
-                      NetMikoTimeoutException )
-from netmiko.ssh_exception import SSHException
+from netmiko import ConnectHandler
 import yaml
 
-def send_config_commands(device, config_commands):
-    result = ''
-    try:
-        with ConnectHandler(**device) as ssh:
-            ssh.enable()
-            result = ssh.send_config_set(config_commands)
-    except(NetMikoAuthenticationException, SSHException, NetMikoTimeoutException) as error:
-        print(error)
 
+commands = ["logging 10.255.255.1", "logging buffered 20010", "no logging console"]
+
+
+def send_config_commands(device, config_commands):
+    with ConnectHandler(**device) as ssh:
+        ssh.enable()
+        result = ssh.send_config_set(config_commands)
     return result
 
 
-
-if __name__ == '__main__':
-    commands = ["logging 10.255.255.1", "logging buffered 20010", "no logging console"]
-    output = ''
-    with open('devices.yaml') as f:
+if __name__ == "__main__":
+    with open("devices.yaml") as f:
         devices = yaml.safe_load(f)
-        for device in devices:
-            output += send_config_commands(device, commands)
-            
-    print(output)
 
-
+    for dev in devices:
+        print(send_config_commands(dev, commands))
