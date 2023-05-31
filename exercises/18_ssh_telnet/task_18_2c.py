@@ -65,7 +65,6 @@ correct_commands = ["logging buffered 20010", "ip http server"]
 
 commands = commands_with_errors + correct_commands
 
-
 def send_config_commands(device, config_commands, log=True):
     good_commands = {}
     bad_commands = {}

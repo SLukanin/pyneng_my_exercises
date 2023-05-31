@@ -34,5 +34,6 @@ with open('devices.yaml') as f:
 
 with ThreadPoolExecutor(max_workers=3) as executor:
     result = executor.map(send_show, devices, repeat('sh clock'))
+    print(type(result))
     for device, output in zip(devices, result):
         print(device['host'], output)
