@@ -39,43 +39,41 @@ router ospf 1
 
 Проверить работу функции на устройствах из файла devices.yaml и словаре commands
 """
-
-# Этот словарь нужен только для проверки работа кода, в нем можно менять IP-адреса
-# тест берет адреса из файла devices.yaml
-
-from netmiko import ConnectHandler
-from concurrent.futures import ThreadPoolExecutor
-import yaml
 from itertools import repeat
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from netmiko import ConnectHandler, NetMikoTimeoutException
+import yaml
+
 
 commands = {
-    "192.168.100.3": "sh run | s ^router ospf",
     "192.168.100.1": "sh ip int br",
-    "192.168.100.2": "sh int desc",
+    "192.168.100.2": "sh arp",
+    "192.168.100.3": "sh ip int br",
 }
 
-def send_show(device, command):
+
+def send_show_command(device, command):
     with ConnectHandler(**device) as ssh:
         ssh.enable()
+        result = ssh.send_command(command)
         prompt = ssh.find_prompt()
-        result = prompt + command + '\n'+ ssh.send_command(command)
-        return result
+    return f"{prompt}{command}\n{result}\n"
 
 
 def send_command_to_devices(devices, commands_dict, filename, limit=3):
-    future_list = []
     with ThreadPoolExecutor(max_workers=limit) as executor:
-      for dev_ip, command in commands_dict.items():
-          for device in devices:
-              if dev_ip in device['host']:
-                future_list.append(executor.submit(send_show, device, command))
-    with open(filename, 'w') as file:  
-      for f in future_list:
-        file.write(f.result() + '\n')
-    return
+        futures = [
+            executor.submit(send_show_command, device, commands_dict[device["host"]])
+            for device in devices
+        ]
+        with open(filename, "w") as f:
+            for future in as_completed(futures):
+                f.write(future.result())
 
-if __name__ == '__main__':
-  with open('devices.yaml') as f:
-    devices_list = yaml.safe_load(f)
-  
-  send_command_to_devices(devices_list, commands, 'qwe')
+
+if __name__ == "__main__":
+    command = "sh ip int br"
+    with open("devices.yaml") as f:
+        devices = yaml.load(f)
+    send_command_to_devices(devices, commands, "result.txt")

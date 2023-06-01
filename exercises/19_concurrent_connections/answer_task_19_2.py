@@ -34,36 +34,31 @@ Ethernet0/1                unassigned      YES NVRAM  administratively down down
 
 Проверить работу функции на устройствах из файла devices.yaml
 """
-from netmiko import ConnectHandler
-from concurrent.futures import ThreadPoolExecutor
-import yaml
 from itertools import repeat
+from concurrent.futures import ThreadPoolExecutor
 
-def send_show(device, command):
+from netmiko import ConnectHandler
+import yaml
+
+
+def send_show_command(device, command):
     with ConnectHandler(**device) as ssh:
         ssh.enable()
+        result = ssh.send_command(command)
         prompt = ssh.find_prompt()
-        result = prompt + command + '\n'+ ssh.send_command(command) + '\n'
-        return result
+    return f"{prompt}{command}\n{result}\n"
 
 
 def send_show_command_to_devices(devices, command, filename, limit=3):
-
     with ThreadPoolExecutor(max_workers=limit) as executor:
-        result = executor.map(send_show, devices, repeat(command))
-        for_file = ''
-
-        # for output in result:
-        #     for_file += output
-    with open(filename, 'w') as f:
-        for output in result:
-            f.write(output)
-
-    return
+        results = executor.map(send_show_command, devices, repeat(command))
+        with open(filename, "w") as f:
+            for output in results:
+                f.write(output)
 
 
-if __name__ == '__main__':
-    with open('devices.yaml') as f:
-        device_list = yaml.safe_load(f)
-    
-    print(send_show_command_to_devices(device_list, 'sh ip int b', 'ff'))
+if __name__ == "__main__":
+    command = "sh ip int br"
+    with open("devices.yaml") as f:
+        devices = yaml.safe_load(f)
+    send_show_command_to_devices(devices, command, "result.txt")
