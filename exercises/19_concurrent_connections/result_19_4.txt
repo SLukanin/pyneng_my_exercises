@@ -1,0 +1,6 @@
+config term
+Enter configuration commands, one per line.  End with CNTL/Z.
+R3(config)#router ospf 55
+R3(config-router)#network 0.0.0.0 255.255.255.255 area 0
+R3(config-router)#end
+R3#
