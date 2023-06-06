@@ -54,10 +54,14 @@ class Topology:
             del self.topology[point_2]
 
     def delete_node(self, node):
+        not_is_in_dict = False
         copy_dict = self.topology.copy()
         for key, value in copy_dict.items():
             if key[0] == node or value[0]== node:
                 del self.topology[key]
+                not_is_in_dict = True
+        if not_is_in_dict:
+            print('Такого устройства нет')
 
 topology_example = {
     ("R1", "Eth0/0"): ("SW1", "Eth0/1"),

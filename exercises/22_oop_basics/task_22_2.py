@@ -47,3 +47,47 @@ self._write_line(line)
 
 Он не должен делать ничего другого.
 """
+import telnetlib
+import yaml
+from pprint import pprint
+
+class CiscoTelnet:
+  def __init__(self,
+                ip,
+                username,
+                password,
+                secret):
+    self.ip = ip
+    self.username = username
+    self.password = password
+    self.secret = secret
+    
+  def _write_line(self, commans_string):
+   return commans_string.encode("ascii") + b"\n"
+  
+    
+  def send_show_command(self, show):
+    with telnetlib.Telnet(self.ip) as telnet:
+      telnet.read_until(b'Username')
+      telnet.write(self._write_line(self.username))
+      telnet.read_until(b'Password')
+      telnet.write(self._write_line(self.password))
+      telnet.read_until
+      index, m, output = telnet.expect([b'>', b'#'])
+      if index == 0:
+        telnet.write(self._write_line('enable'))
+        telnet.read_until(b'Password')
+        telnet.write(self._write_line(self.secret))
+        telnet.read_until(b'#')
+      telnet.write(self._write_line(show))
+      result = telnet.read_until(b'#').decode('ascii')
+
+      return result
+    
+
+if __name__ == '__main__':
+  with open('devices.yaml') as f:
+    devices = yaml.safe_load(f)
+    for device in devices:
+      connection = CiscoTelnet(**device)
+      print(connection.send_show_command('sh ip int br'))

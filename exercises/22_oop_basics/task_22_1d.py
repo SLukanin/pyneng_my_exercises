@@ -72,7 +72,7 @@ class Topology:
         is_it_present =False
         for key, value in self.topology.items():
             if (key == point_1 and value == point_2) or (key == point_2 and value == point_1):
-                print('Такое соединение уже существует')
+                print('Такое соединение существует')
                 is_it_present = True
             elif key == point_1 or key == point_2 or value == point_1 or value == point_2:
                 print('Соединение с одним из портов существует')
