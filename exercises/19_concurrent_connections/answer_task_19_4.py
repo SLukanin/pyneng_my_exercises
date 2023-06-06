@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 """
 Задание 19.4
@@ -106,42 +105,44 @@ R3#
 
 Для выполнения задания можно создавать любые дополнительные функции.
 """
+from itertools import repeat
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from netmiko import ConnectHandler, NetMikoTimeoutException
 import yaml
-from concurrent.futures import ThreadPoolExecutor
-from netmiko import ConnectHandler
-from pprint import pprint
+
 
 def send_show_command(device, command):
     with ConnectHandler(**device) as ssh:
         ssh.enable()
+        result = ssh.send_command(command)
         prompt = ssh.find_prompt()
-        output = ssh.send_command(command)
-        result = prompt + command + '\n'+ output
-        return result
-def send_config_commands(device, commands):
+    return f"{prompt}{command}\n{result}\n"
+
+
+def send_cfg_commands(device, commands):
     with ConnectHandler(**device) as ssh:
         ssh.enable()
-        prompt = ssh.find_prompt()
-        # result = prompt + '\n'.join(commands) + '\n' + ssh.send_config_set(commands) + '\n'
         result = ssh.send_config_set(commands)
-        return result
+    return f"{result}\n"
+
 
 def send_commands_to_devices(devices, filename, *, show=None, config=None, limit=3):
     if show and config:
-        raise ValueError
-    result = ''
+        raise ValueError("Можно передавать только один из аргументов show/config")
+    command = show if show else config
+    function = send_show_command if show else send_cfg_commands
+
     with ThreadPoolExecutor(max_workers=limit) as executor:
-        for device in devices:
-            if show:
-                result += executor.submit(send_show_command, device, show).result() + '\n'
-            if config:
-                result += executor.submit(send_config_commands, device, config).result()
-    with open(filename, 'w') as f:
-        f.write(result)
+        futures = [executor.submit(function, device, command) for device in devices]
+        with open(filename, "w") as f:
+            for future in as_completed(futures):
+                f.write(future.result())
 
 
-if __name__ == '__main__':
-    commands = ['router ospf 55', 'network 0.0.0.0 255.255.255.255 area 0']
-    with open('devices.yaml') as f:
-        devices_list = yaml.safe_load(f)
-    send_commands_to_devices(devices_list, 'result_19_4.txt',config=commands)
+if __name__ == "__main__":
+    command = "sh ip int br"
+    with open("devices.yaml") as f:
+        devices = yaml.load(f)
+    send_commands_to_devices(devices, show=command, filename="result.txt")
+    send_commands_to_devices(devices, config="logging 10.5.5.5", filename="result.txt")
