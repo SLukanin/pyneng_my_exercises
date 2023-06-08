@@ -1,6 +1,6 @@
-router ospf 1
+router ospf {{ process }}
  router-id {{ router_id }}
- auto-cost reference-bandwidth {{ ref_bv }}
+ auto-cost reference-bandwidth {{ ref_bw }}
 {% for intf in ospf_intf %}
  network {{ intf.ip }} 0.0.0.0 area {{ intf.area }}
  {% if intf.passive %}
