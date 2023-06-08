@@ -24,7 +24,8 @@ from jinja2 import FileSystemLoader, Environment
 def generate_config(template, data_dict):
     env = Environment(
         loader=FileSystemLoader('.'),
-        trim_blocks=True)
+        trim_blocks=True,
+        lstrip_blocks=True)
     templ = env.get_template(template)
 
     return templ.render(data_dict)
