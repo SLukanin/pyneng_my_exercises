@@ -1,4 +1,4 @@
-router ospf {{ process }}
+router ospf {{ process | default(1, true) }}
  router-id {{ router_id }}
  auto-cost reference-bandwidth {{ ref_bw }}
 {% for intf in ospf_intf %}

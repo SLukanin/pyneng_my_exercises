@@ -4,7 +4,7 @@ crypto isakmp policy {{ tun_num }}
  group 5
  hash sha
 
-crypto isakmp key cisco address 192.168.100.1
+crypto isakmp key cisco address {{ wan_ip_1 }}
 
 crypto ipsec transform-set AESSHA esp-aes esp-sha-hmac
  mode transport
@@ -17,4 +17,3 @@ interface Tunnel {{ tun_num }}
  tunnel source {{ wan_ip_2 }}
  tunnel destination {{ wan_ip_1 }}
  tunnel protection ipsec profile GRE
-
