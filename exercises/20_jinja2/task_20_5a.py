@@ -37,6 +37,14 @@
 интерфейсов, но при этом не проверяет настроенные номера тунелей и другие команды.
 Они должны быть, но тест упрощен, чтобы было больше свободы выполнения.
 """
+import yaml
+from jinja2 import FileSystemLoader, Environment
+from netmiko import (ConnectHandler, 
+                     NetMikoAuthenticationException,
+                     NetmikoTimeoutException)
+from task_20_1 import generate_config
+import re
+from pprint import pprint
 
 data = {
     "tun_num": None,
@@ -45,3 +53,65 @@ data = {
     "tun_ip_1": "10.0.1.1 255.255.255.252",
     "tun_ip_2": "10.0.1.2 255.255.255.252",
 }
+
+def configure_vpn(src_device_params, 
+                  dst_device_params, 
+                  src_template, 
+                  dst_template, 
+                  vpn_data_dict):
+    non_free_intfs = []
+    src_loopbacks = get_free_interface(src_device_params)
+    dst_loopbacks = get_free_interface(dst_device_params)
+    non_free_intfs.extend(src_loopbacks)
+    non_free_intfs.extend(dst_loopbacks)
+    non_free_intfs = list(set(non_free_intfs))
+    non_free_intfs.sort()
+
+    free_loopback = 0
+    for i in range(20):
+        if i not in non_free_intfs:
+            free_loopback = i
+            break
+    vpn_data_dict['tun_num'] = free_loopback
+    pprint(vpn_data_dict)
+
+    config_1 = generate_config(src_template, vpn_data_dict).split('\n')
+    config_2 = generate_config(dst_template, vpn_data_dict).split('\n')
+    
+    try:
+        with ConnectHandler(**src_device_params) as ssh:
+            ssh.enable()
+            ssh.send_command("terminal length 0")
+            ssh.send_config_set(config_1)
+    except (NetMikoAuthenticationException, NetmikoTimeoutException) as error:
+        print(error)
+
+    try:
+        with ConnectHandler(**dst_device_params) as ssh:
+            ssh.enable()
+            ssh.send_command("terminal length 0")
+            ssh.send_config_set(config_2)
+    except (NetMikoAuthenticationException, NetmikoTimeoutException) as error:
+        print(error) 
+    return
+
+def get_free_interface(device):
+    regex = r'Tunnel(\d+)'
+    with ConnectHandler(**device) as ssh:
+        output = ssh.send_command('show ip int br')
+    match = re.finditer(regex, output)
+    loopbacks = [int(m.group(1)) for m in match if match]
+    return loopbacks
+
+
+if __name__ == '__main__':
+    with open('devices.yaml') as f:
+        devices = yaml.safe_load(f)
+    
+    intfs = get_free_interface(devices[2])
+    print(intfs)
+
+    # configure_vpn(devices[1], devices[2],
+    #               'templates/gre_ipsec_vpn_1.txt',
+    #               'templates/gre_ipsec_vpn_1.txt',
+    #                data)

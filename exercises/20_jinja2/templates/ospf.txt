@@ -7,11 +7,7 @@ router ospf {{ process | default(1, true) }}
  passive-interface {{intf.name}}
  {% endif %}
  {% endfor %}
-!
-{% for intf in ospf_intf %}
- {% if not intf.passive %}
+{% for intf in ospf_intf if not intf.passive%}
 interface {{ intf.name }}
  ip ospf hello-interval 1
-!
- {% endif %}
 {% endfor %}

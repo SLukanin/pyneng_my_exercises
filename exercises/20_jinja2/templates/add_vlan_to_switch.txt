@@ -1,4 +1,3 @@
-!
 vlan {{ vlan_id }}
  name {{ name }}
 {% if access %}
@@ -14,4 +13,3 @@ interface {{ intf }}
  switchport trunk allowed vlan add {{ vlan_id }}
  {% endfor %}
 {% endif %}
-
